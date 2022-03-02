@@ -23,3 +23,6 @@
 
 # Editor specific
 .vscode/
+
+[bB]in/
+[oO]bj/
