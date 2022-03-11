@@ -33,16 +33,32 @@ public class TaskCController : ControllerBase
         }
     }
 }
-
+/// <summary>
+/// The structure of the result returned by this API
+/// </summary>
 public class ResultObject
 {
+    /// <summary>
+    /// Collection of faces in the image
+    /// </summary>
+    /// <value></value>
     public FaceObject[] Faces { get; set; }
+    /// <summary>
+    /// Collection of logos in the image
+    /// </summary>
+    /// <value></value>
     public LogoObject[] Logos { get; set; }
+    /// <summary>
+    /// Construuctor for this class
+    /// </summary>
     private ResultObject()
     {
         Faces = Array.Empty<FaceObject>();
         Logos = Array.Empty<LogoObject>();
     }
+    /// <summary>
+    /// Construuctor for this class
+    /// </summary>
     public ResultObject(FaceAnnotation[] facesAnn, EntityAnnotation[] logosAnn)
     {
         Faces = new FaceObject[facesAnn.Length];
@@ -57,14 +73,40 @@ public class ResultObject
             Logos[i] = new(logosAnn[i]);
         }
     }
+    /// <summary>
+    /// object returned for invalid input or any other exception
+    /// </summary>
     public static ResultObject Default => new();
 }
+/// <summary>
+/// An object denoting a face in the image
+/// </summary>
 public class FaceObject
 {
+    /// <summary>
+    /// The confidence value for this portion of the image is a Face
+    /// </summary>
+    /// <value></value>
     public float Confidence { get; set; }
+    /// <summary>
+    /// How likely is this face happy
+    /// </summary>
+    /// <value></value>
     public string JoyLiklihood { get; set; }
+    /// <summary>
+    /// How likely is this face Sad
+    /// </summary>
+    /// <value></value>
     public string SadLiklihood { get; set; }
+    /// <summary>
+    /// How likely is this face angry
+    /// </summary>
+    /// <value></value>
     public string AngryLiklihood { get; set; }
+    /// <summary>
+    /// Constructor for this class
+    /// </summary>
+    /// <param name="face"></param>
     public FaceObject(FaceAnnotation face)
     {
         Confidence = face.DetectionConfidence;
@@ -73,10 +115,25 @@ public class FaceObject
         AngryLiklihood = Enum.GetName(face.AngerLikelihood) ?? "?";
     }
 }
+/// <summary>
+/// An object denoting a Logo in the image
+/// </summary>
 public class LogoObject
 {
+    /// <summary>
+    /// The confidence value for this portion of image is Logo
+    /// </summary>
+    /// <value></value>
     public float Confidence { get; set; }
+    /// <summary>
+    /// Description of this logo
+    /// </summary>
+    /// <value></value>
     public string Description { get; set; }
+    /// <summary>
+    /// Constructor for this class
+    /// </summary>
+    /// <param name="logo"></param>
     public LogoObject(EntityAnnotation logo)
     {
         Confidence = logo.Score / 10.0f;
