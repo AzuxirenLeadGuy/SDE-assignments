@@ -1,7 +1,5 @@
-﻿using TaskA;
-using MySql.Data.MySqlClient;
-
-namespace Program
+﻿using MySql.Data.MySqlClient;
+namespace TaskA
 {
     public static class Program
     {
