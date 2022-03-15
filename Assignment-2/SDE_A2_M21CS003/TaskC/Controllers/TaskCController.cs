@@ -7,14 +7,28 @@ namespace TaskC.Controllers;
 [Route("[controller]")]
 public class TaskCController : ControllerBase
 {
+    /// <summary>
+    /// The object for logging text during the API calls for debugging
+    /// </summary>
     private readonly ILogger<TaskCController> _logger;
+    /// <summary>
+    /// The Google Vision API request client builder
+    /// </summary>
     private readonly ImageAnnotatorClientBuilder builder;
+    /// <summary>
+    /// Constructor for this class
+    /// </summary>
+    /// <param name="logger">Logger for the API</param>
     public TaskCController(ILogger<TaskCController> logger)
     {
         _logger = logger;
         builder = new();
         builder.JsonCredentials = System.IO.File.ReadAllText(Program.KeyPath);
     }
+    /// <summary>
+    /// Post method of the API
+    /// </summary>
+    /// <returns>Fully initialized `ResultObject` instance for the image</returns>
     [HttpPost(Name = "LoadFile")]
     public ResultObject Post()
     {
