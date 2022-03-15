@@ -7,7 +7,7 @@ namespace TaskB
     /// </summary>
 
     [BsonIgnoreExtraElements]
-    public struct SimpleDate
+    public class SimpleDate
     {
         public int Day { get; set; }
         public int Month { get; set; }
@@ -31,6 +31,11 @@ namespace TaskB
         public ulong Accession_No { get; set; }
         public SimpleDate Issue_Date { get; set; }
         public SimpleDate Return_Date { get; set; }
+        public Reader()
+        {
+            Issue_Date=new();
+            Return_Date=new();
+        }
     }
     /// <summary>
     /// Reader structure to store in NoSQL
@@ -49,6 +54,10 @@ namespace TaskB
     {
         public uint Reader_Id {get; set;}
         public SimpleDate Issue_Date { get; set; }
+        public Reader_Issue_Column()
+        {
+            Issue_Date=new();
+        }
     }
     /// <summary>
     /// Reader structure to store in NoSQL
@@ -58,5 +67,9 @@ namespace TaskB
     {
         public uint Reader_Id {get; set;}
         public SimpleDate Return_Date { get; set; }
+        public Reader_Return_Column()
+        {
+            Return_Date=new();
+        }
     }
 }

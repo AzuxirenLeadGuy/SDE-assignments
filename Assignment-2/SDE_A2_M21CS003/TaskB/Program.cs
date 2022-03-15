@@ -42,16 +42,16 @@ namespace TaskB
                             Console.WriteLine("Enter book to update the record with");
                             var (Updated, UpdatedReaders) = con.Update(acc_no, ConsoleInputBook());
                             if (Updated)
-                                Console.WriteLine($"Book is updated, and {UpdatedReaders} readers document also affected");
+                                Console.WriteLine($"Book is updated, and {(UpdatedReaders?1:0)} readers document also affected");
                             else
                                 Console.WriteLine("No documents updated!");
                             break;
                         case '3':
-                            Console.Write("Enter the accession_no of the book to update: ");
+                            Console.Write("Enter the accession_no of the book to delete: ");
                             acc_no = ulong.Parse(Console.ReadLine() ?? "0");
                             var (BookDeleted, DeletedReaders) = con.Delete(acc_no);
                             if (BookDeleted)
-                                Console.WriteLine($"Book is deleted, and {DeletedReaders} readers document also affected");
+                                Console.WriteLine($"Book is deleted, and {(DeletedReaders?1:0)} readers document also affected");
                             else
                                 Console.WriteLine("No docuements deleted!");
                             break;
@@ -66,16 +66,16 @@ namespace TaskB
                                 Console.WriteLine("\nCould not insert book in the collection!!");
                             break;
                         case '6':
-                            Console.Write("Enter the reader_id of the book to update: ");
+                            Console.Write("Enter the reader_id of the Reader to update: ");
                             read_id = uint.Parse(Console.ReadLine() ?? "0");
-                            Console.WriteLine("Now taking input of Book structure: ");
+                            Console.WriteLine("Now taking input of reader structure: ");
                             if (con.Update(read_id, ConsoleInputReader()))
                                 Console.WriteLine("\nReader updated into the collection successfully!");
                             else
                                 Console.WriteLine("\nCould not update reader in the collection!!");
                             break;
                         case '7':
-                            Console.Write("Enter the reader_id of the book to update: ");
+                            Console.Write("Enter the reader_id of the Reader to delete: ");
                             read_id = uint.Parse(Console.ReadLine() ?? "0");
                             if (con.Delete(read_id))
                                 Console.WriteLine("Document deleted successfully!");
@@ -121,7 +121,7 @@ namespace TaskB
         {
             foreach (var book in books)
             {
-                Console.WriteLine($"[{book.ISBN,7},{book.Accession_No.ToString().PadLeft(12, '0')}, {book.Title,18}, {book.Author, 12}, {book.Publisher,12}, {book.Edition, 2}, {book.YearOfPublication, 4}, {book.Category,6}, {book.Pages, 5}, {book.Price, 5} ]");
+                Console.WriteLine($"[{book.ISBN,7},  {book.Accession_No.ToString().PadLeft(12, '0')}, {book.Title,18}, {book.Author, 14}, {book.Publisher,16}, {book.Edition, 2}, {book.YearOfPublication, 4}, {book.Pages, 5}, {book.Price, 5}, {book.Category,6} ]");
             }
         }
         public static void Display(IEnumerable<Reader> readers)
