@@ -183,9 +183,8 @@ a0001   |       110320220001    |       Programming in C        |       Ashish  
 a0002   |       110320220002    |       Programming in C        |       Ashish  |       IIT-J   |       2       |       2003    |       C       |       25      |       110.0000
 
 
-
 .
-.
+. //Output is truncated here
 .
 
 You will now be prompted to enter a document in the database
@@ -217,7 +216,6 @@ d0003   |       110320220010    |       DBMS in a nutshell      |       Peter Ir
 
 Enter another document? (Press Y/y)
 n
-
 
 ```
 
@@ -345,7 +343,9 @@ Next, the C# library of Task-1 is added as a dependency to extend functionalitie
 ```csharp
     public class MongoConnector2 : MongoConnector
     {
-        protected readonly IMongoCollection<Reader> _readers;
+        protected readonly IMongoCollection<Reader_Accession_Column> _r_acc;
+        protected readonly IMongoCollection<Reader_Issue_Column> _r_iss;
+        protected readonly IMongoCollection<Reader_Return_Column> _r_ret;
         public MongoConnector2(string pass) : base(pass) { ...}
         public (bool BookDeleted, long DeletedReaders) Delete(ulong accession_No) {...}
         public (bool Updated, long UpdatedReaders) Update(ulong accession_No, Book updatedbook) {...}
@@ -356,26 +356,31 @@ Next, the C# library of Task-1 is added as a dependency to extend functionalitie
     }
 ```
 
-The following additions are made in the `class MongoConnectorB` over the `class MongoConnector` class used in Task-1
+The `MongoConnector` class already had connection to the MongoDB atlas cluster defined, along with support for insertion of `Book` objects in the Collection. By inheriting the class, the implementation is made more convenient since now the `MongoConnectorB` can perform all these tasks as well. The following additions are made in the `class MongoConnectorB` over the `class MongoConnector` class used in Task-1
 
-- Support for additonal collection named "Readers"
-- Modified constructor to initialize the `_readers` Collection
+- Support for additional collection named `_r_acc`,`_r_iss`, `_r_ret`, which store the columns of the "Readers" database. 
+- Modified constructor to initialize the Collections for the "Readers" database.
 - **Support for `Delete(ulong accession_no)` which removes the entries in both the "Books" collection,  and also "Readers" collection to maintain referential integrity.** 
 - **Support for `Update(ulong Accession_No, Book updatedBook)`, which finds the Book in the "Books" collection with the queried Accession_no to update it, and also updates all mentions of this book in the "Readers" collection as well, to maintain referential integrity.**
-- Support for Insertion, Updation, Deletion, and Listing of Documents in the "Readers" collection.
+- Support for Insert, Update, Delete, and Listing of Documents in the "Readers" collection.
 
 These methods are provided in the fully documented file `TaskB/MongoConnectorB.cs` file. A brief working of these methods are as follows
 
 - CRUD methods for collection `Books`
-    - `Insert(Book book)`: Check if all keys (`ISBN` and `Accession_No`) are unique, and `Category` is only one of `{'C', 'Java'. 'Python', 'DBMS'}`. If all constraints are satisfied, then insert the document.
-    - `Update(ulong accession_no, Book updatedBook)` : Update the book if it satisfies all constraints, and it exists, and check if the `Accession_No` is changed. If yes, then maintain referential integrity with `Readers` by updating all records having the old `Accession_No` by updating it with new value.
-    - `Delete(ulong accession_no)`: Delete the document in `Book` with the given `Accession_No`. If document is deleted, also search and delete all records in `Readers` linked with the same `Accession_No` in order to maintain referential integrity.
-    - `GetAllBooks()`: Returns an enumeration of all documents in `Books` collection.
+    - **`Insert(Book book)`**: Check if both the keys (`ISBN` and `Accession_No`) are unique, and `Category` is only one of `{'C', 'Java'. 'Python', 'DBMS'}`. If all constraints are satisfied, then insert the document.
+    - **`Update(ulong accession_no, Book updatedBook)`** : Update the book if it satisfies all constraints, and it exists, and check if the `Accession_No` is updated. If yes, then maintain referential integrity with `Readers` by updating all records having the old `Accession_No` by updating it with new value. 
+    - **`Delete(ulong accession_no)`**: Delete the document in `Book` with the given `Accession_No`. If document is deleted, also search and delete all records in `Readers` linked with the same `Accession_No` in order to maintain referential integrity.
+    - **`GetAllBooks()`**: Returns an enumeration of all documents in `Books` collection.
+    
 - CRUD methods for collection `Readers`
-    - `Insert(Reader reader)`: Check if key `Reader_ID` is unique and a document in `Books` exists with the given `Accession_No`, in order to maintain referential integrity. Since the mapping is 1:1, `Accession_No` must be Unique as well. If all constraints are satisfied, then insert the document in the `Readers` collection.
-    - `Update(uint reader_id, Reader updatedReader)`: If a document with the given `Reader_Id` exists, and the updated instance is valid, then update the record. Also ensure that the document linked by the instance's foreign key also exists. Also ensure that the `Accession_no` would unique in the collection. If all constraints are satisfied, update the docuement.
-    - `Delete(uint reader_id)`: Delete the document with the given `Reader_Id` value.
-    - `GetAllReaders()`: Merge all columns of the `Readers` database and pass it as an enumeration of `Reader` objects.
+    - **`Insert(Reader reader)`**: Check if key `Reader_ID` is unique and a document in `Books` exists with the given `Accession_No`, in order to maintain referential integrity. Since the mapping is 1:1, `Accession_No` must be Unique as well. If all constraints are satisfied, then insert the document in the `Readers` collection.
+    - **`Update(uint reader_id, Reader updatedReader)`**: If a document with the given `Reader_Id` exists, and the updated instance is valid, then update the record and ensure that the document linked by the instance's foreign key also exists. Also ensure that the `Accession_no` would stay unique in the collection. If all constraints are satisfied, update the document.
+    - **`Delete(uint reader_id)`**: Delete the document with the given `Reader_Id` value.
+    - **`GetAllReaders()`**: Merge all columns of the `_r_acc`, `_r_iss` and `r_ret` databases, merge it as objects of `Readers` and pass it as an enumeration of `Reader` objects.
+    
+    Needless to say, all constraint checks happen on `_r_acc` collection, and thus the column store database structure is taken advantage of in this situation, since only these columns are fetched for constraint checks, rather than fetching all attributes of the objects.
+    
+    Thus, the script ensures that the referential integrity between both the collections is maintained for any CRUD operations.
 
 ## Execution
 
@@ -654,25 +659,23 @@ Enter your choice:
 
 ______________________________
 
-
-
 ```
 
 
-## Conslusion
+## Conclusion
 
-Thus, CRUD operations are defined on both the NoSQL collections, and all the constraints, including referential integrity, is maintianed between collections that are Document databases and Wide-Column databases as well.
+Thus, CRUD operations are defined on both the NoSQL collections, and all the constraints, including referential integrity, is maintained by the script between a collection that is stored as document database and a collection stored as a Wide-Column databases. The script maintains a 1:1 mapping between the objects of different collections. 
 
 
 # Task 3
 
-For setting up the project, this [Setup guide](https://cloud.google.com/vision/docs/libraries?hl=en_US) from google developers was referred. The JSON key for the same is present in the project folder. This program requires the path of the key as a command line argument.
+For setting up the project, this [Setup guide](https://cloud.google.com/vision/docs/libraries?hl=en_US) from Google developers was referred. The JSON key for the same is present in the project folder. This program requires the path of the key as a command line argument.
 
 ## Implementation
 
-The project is a typical .NET Web Api. The file `Program.cs` launches the Web api and listens on the port. The Api contoller is defined in the file `Controller/TaskCController`, which contains a POST request for an image file and returns the structure containing all information regarding face and logo recognition.
+The project is a typical .NET Web API. The file `Program.cs` launches the Web API and listens on the port. The API controller is defined in the file `Controller/TaskCController`, which contains a POST request for an image file and returns the structure containing all information regarding face and logo recognition.
 
-The structure returned by the Api for a given image is as shown.
+The structure returned by the API for a given image is as shown.
 
 ```csharp
 public class ResultObject
@@ -702,7 +705,7 @@ public class LogoObject
 
 These features are obtained with [Google's Vision API for .NET](https://cloud.google.com/dotnet/docs/reference/Google.Cloud.Vision.V1/latest/index)
 
-The client requires creadentials of the user which is included in json format in the file `TaskC/Keys/assignment2-342913-e2d3ba3b206e.json`. This file will be required to be inputted using command-line arguemnt for this program.
+The client requires credentials of the user which is included in JSON format in the file `TaskC/Keys/assignment2-342913-e2d3ba3b206e.json`. This file will be required to be inputted using command-line argument for this program.
 
 
 ## Execution
@@ -715,7 +718,7 @@ $ dotnet run ./Keys/assignment2-342913-e2d3ba3b206e.json
 
 to launch the program.
 
-This will initiate the Api at a localhost at a random port. This address will be mentioned in the output of the program
+This will initiate the API at a localhost at a random port. This address will be mentioned in the output of the program
 
 ```
 
