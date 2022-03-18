@@ -26,3 +26,14 @@
 
 [bB]in/
 [oO]bj/
+
+# Images
+
+*.png
+*.jpg
+*.jpeg
+
+# submissions
+*.zip
+README.pdf
+Keys/
