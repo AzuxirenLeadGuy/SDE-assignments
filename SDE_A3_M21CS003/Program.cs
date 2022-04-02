@@ -15,7 +15,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-SDE_A3_M21CS003.Controllers.ImagePredictController.MachineName = System.Reflection.Assembly.GetExecutingAssembly().Location;
+SDE_A3_M21CS003.Controllers.ImagePredictController.MachineName = System.Environment.MachineName;
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
