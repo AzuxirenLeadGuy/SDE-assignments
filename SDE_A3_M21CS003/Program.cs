@@ -17,9 +17,6 @@ if (app.Environment.IsDevelopment())
 }
 SDE_A3_M21CS003.Controllers.ImagePredictController.MachineName = System.Environment.MachineName;
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
-
 app.Run();
