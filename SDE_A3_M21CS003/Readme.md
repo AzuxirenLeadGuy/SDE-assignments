@@ -32,23 +32,21 @@ The following is used as a start-up script for the instances:
 #! /bin/bash
 
 # install the dependancies
-sudo apt install -y screen git curl make
+sudo apt install -y screen git curl make wget;
 
-wget https://packages.microsoft.com/config/debian/11/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
-sudo dpkg -i packages-microsoft-prod.deb
-rm packages-microsoft-prod.deb
+wget https://packages.microsoft.com/config/debian/11/packages-microsoft-prod.deb -O packages-microsoft-prod.deb;
+sudo dpkg -i packages-microsoft-prod.deb;
+rm packages-microsoft-prod.deb;
 
-sudo apt-get update; \
-  sudo apt-get install -y apt-transport-https && \
-  sudo apt-get update && \
-  sudo apt-get install -y dotnet-sdk-6.0
+sudo apt-get update;
+sudo apt-get install -y apt-transport-https && sudo apt-get update &&  sudo apt-get install -y dotnet-sdk-6.0;
   
 # All dependancies are installed.
+sleep 120;
 
-git clone https://AzuxirenLeadGuy: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@github.com/AzuxirenLeadGuy/SDE-assignments.git
-cd SDE-assignments/SDE_A3_M21CS003
-screen -dmS webapp
-screen -S webapp -p 0 -X stuff 'make && make run\n'
+sudo screen -dmS webapp;
+sudo screen -S webapp -p 0 -X stuff 'mkdir /home/ashishjacobsam/webapp;\n git clone https://AzuxirenLeadGuy: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@github.com/AzuxirenLeadGuy/SDE-assignments.git /home/ashishjacobsam/webapp > /home/ashishjacobsam/log.txt 2> /home/ashishjacobsam/errors.txt;\n dotnet build /home/ashishjacobsam/webapp/SDE_A3_M21CS003/SDE_A3_M21CS003.csproj;\n make -C /home/ashishjacobsam/webapp/SDE_A3_M21CS003/;\n make run -C /home/ashishjacobsam/webapp/SDE_A3_M21CS003/; \n';
+
 ```
 
 This script will install dotnet sdk and clone a specified repository to run and build the application
@@ -80,4 +78,36 @@ public class CreateBucketSample
 
 ## Cloud AI
 
-Google offers multiple subpackages in its umbrella service for AI, including Vertex AI, Vision AI and AutoML. For this assignment, the Vision AI API is selected, specifically to read and identify characters from the image.  
+Google offers multiple subpackages in its umbrella service for AI, including Vertex AI, Vision AI and AutoML. For this assignment, the Vision AI API is selected, specifically to read and identify characters from the image. 
+
+In this assignment, an API is created which consumes the Cloud AI APIs to check if the document contains a certain keyword, and uploads them to the common storage.
+
+The following structures are in use by the program
+
+```csharp
+/// <summary>
+/// The structure of the result returned by this API
+/// </summary>
+public class ResultObject
+{
+    public string MachineName { get; set; }
+    /// <summary>
+    /// Collection of texts in the image
+    /// </summary>
+    /// <value></value>
+    public EntityAnnotation[] Texts { get; set; }
+    /// <summary>
+    /// True if the object is also uploaded to the cloud
+    /// </summary>
+    /// <value></value>
+    public bool Uploaded { get; set; }
+    /// <summary>
+    /// The URL of the file in the bucket, if file is indeed uploaded to the bucket
+    /// </summary>
+    /// <value></value>
+    public string UploadURL { get; set; }
+}
+```
+
+Next a load balancer is configured for a group of VMs which is created using the [following tutorial](https://cloud.google.com/compute/docs/tutorials/high-availability-load-balancing#create_a_regional_managed_instance_group)
+
