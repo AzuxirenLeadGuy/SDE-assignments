@@ -21,16 +21,12 @@ public class ImagePredictController : ControllerBase
     public async Task<ResultObject> Post(string keywords = "")
     {
         if (keywords == null || keywords == string.Empty) return new(MachineName, null!);
-        var streamcopy = new MemoryStream();
-        var task = Request.Body.CopyToAsync(streamcopy);
         ImageAnnotatorClient client = builder.Build();
         string bucketName = "sde-a3-bucket";
         string imagename = "image-a3-" + random.NextInt64().ToString();
-        await task;
-        streamcopy.Seek(0, SeekOrigin.Begin);
-        var img = Image.FromStreamAsync(streamcopy);
-        streamcopy.Seek(0, SeekOrigin.Begin);
-        var obj = new ResultObject(MachineName, client.DetectText(img.Result));
+        var img = Image.FromStreamAsync(Request.Body);
+        var imgres = await img;
+        var obj = new ResultObject(MachineName, client.DetectText(imgres));
         foreach (var keyword in keywords.Split(';', StringSplitOptions.None))
         {
             bool found = false;
@@ -47,8 +43,7 @@ public class ImagePredictController : ControllerBase
             if (found == false) return obj;
         }
         var storage = StorageClient.Create(credentials);
-        streamcopy.Seek(0, SeekOrigin.Begin);
-        var file = storage.UploadObject(bucketName, imagename, null, streamcopy);
+        var file = storage.UploadObject(bucketName, imagename, null, new MemoryStream(imgres.Content.ToByteArray()));
         obj.Uploaded = true;
         obj.UploadURL = file.Name;
         return obj;
