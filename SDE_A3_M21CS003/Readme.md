@@ -16,6 +16,11 @@ For this, the following application use case is defined
 
 This Assignment is developed using [.NET SDK 6] on a linux machine and is hosted in a debian-based VM using the Cloud services. Being a .NET web app, the following ASP project is prepared as shown
 
+
+## Program description
+
+The Program for this assignment will be an API. This API can read an image document for all text and then proceeds to upload it to the predefined google storage bucket. This application will be hosted in the VMs provided by the Google Compute engine.
+
 ## Google Compute Engine
 
 Google Compute Engine allows to prepare/launch VMs on cloud. For this assignment.
@@ -109,5 +114,36 @@ public class ResultObject
 }
 ```
 
+---
+
+## Assignment setup 
+
+First, the required application is built and tested locally
+
+![image-20220406004955402](/home/leadguy/.config/Typora/typora-user-images/image-20220406004955402.png)
+
+Currently the project is made very basic and simple, in order to prove simple enough for the assignment. There is a GET method that returns a 200 status. This is for the purpose of checking the health of the site. Along with this, the main method offered by the application is a POST method which performs the functionality as described in the beginning of the report.
+
+With this, the demo application is complete (Task 1). Next, this application is to be hosted in a VM using Google Cloud Console.
+
+First, the required APIs are enabled within the Google Cloud Platform. Then a VM template is prepared such that it installs all necessary tools, clones a git repository to download this code, compiles and starts listening on the port 80. A VM instance group is created which hosts multiple such VMs.
+
+![image-20220406005222899](/home/leadguy/.config/Typora/typora-user-images/image-20220406005222899.png)
+
+The autoscaling is kept off for the moment. As shown, there are currently 3 VMs present in the group.
+
 Next a load balancer is configured for a group of VMs which is created using the [following tutorial](https://cloud.google.com/compute/docs/tutorials/high-availability-load-balancing#create_a_regional_managed_instance_group)
 
+![image-20220406004800441](/home/leadguy/.config/Typora/typora-user-images/image-20220406004800441.png)
+
+A static IP address is created, and the load-balancer can now redirect the requests to the VMs that are healthy. It can be noted that the program is executed by different machines by checking the GET method, which returns the machine name. For example, the following machine names were observed at this IP address
+
+- a3-vm-group-xh4z
+- a3-vm-group-wdrw
+- a3-vm-group-0zt0
+
+A full description of the process is provided in the youtube video, given by the link: (Only IIT-J mails can view) https://youtu.be/BfRonsNxovI
+
+## Remarks
+
+Thus, the requirements of the assignments are satisfied by the program in this assignment. 
