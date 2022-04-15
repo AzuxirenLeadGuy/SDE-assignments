@@ -3,13 +3,19 @@ using System.Collections;
 
 namespace SDE_Project
 {
+    public struct HashStruct
+    {
+        public readonly byte A, B;
+        public int Hash(int x) => x * A + B;
+        public HashStruct(byte a, byte b) => (A, B) = (a, b);
+    }
     public class StandardBloomFilter<ItemType>
     {
         protected readonly BitArray _bits;
         protected readonly byte K;
         protected readonly int X;
-        protected readonly (byte A, byte B)[] DefaultHashes;
-        public StandardBloomFilter(int bits, (byte A, byte B)[] hashes)
+        protected readonly HashStruct[] DefaultHashes;
+        public StandardBloomFilter(int bits, HashStruct[] hashes)
         {
             K = (byte)hashes.Length;
             if (K < 2) throw new ArgumentException($"Number of hash functions must be at least 2, recived an array whose (byte) casted length is {K}", nameof(hashes));
@@ -21,14 +27,14 @@ namespace SDE_Project
         protected virtual int[] GetHashes(ItemType item)
         {
             if (item == null) throw new ArgumentException($"Cannot find HashCode of a null object!", nameof(item));
-            int[] hs = new int[K];
-            var hf = DefaultHashes;
-            var hv = item.GetHashCode();
+            int[] result = new int[K];
+            var funcs = DefaultHashes;
+            var orighash = item.GetHashCode();
             for (int i = 0; i < K; i++)
             {
-                hs[i] = hf[i].A * hv + hf[i].B;
+                result[i] = funcs[i].Hash(orighash);
             }
-            return hs;
+            return result;
         }
         public virtual bool Check(ItemType item)
         {
