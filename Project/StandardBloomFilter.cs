@@ -3,24 +3,18 @@ using System.Collections;
 
 namespace SDE_Project
 {
-    public struct HashStruct
-    {
-        public readonly byte A, B;
-        public int Hash(int x) => x * A + B;
-        public HashStruct(byte a, byte b) => (A, B) = (a, b);
-    }
     public class StandardBloomFilter<ItemType>
     {
         protected readonly BitArray _bits;
         protected readonly byte K;
-        protected readonly int X;
+        protected readonly int M;
         protected readonly HashStruct[] DefaultHashes;
         public StandardBloomFilter(int bits, HashStruct[] hashes)
         {
             K = (byte)hashes.Length;
             if (K < 2) throw new ArgumentException($"Number of hash functions must be at least 2, recived an array whose (byte) casted length is {K}", nameof(hashes));
             if (bits < K) throw new ArgumentException($"Number of bits must be positive and greater than K(number of hashs). Recived K={K} and bits={bits}", nameof(bits));
-            X = bits;
+            M = bits;
             DefaultHashes = hashes;
             _bits = new BitArray(length: bits, defaultValue: false);
         }
@@ -55,6 +49,6 @@ namespace SDE_Project
                 _bits.Set(Mod(positions[i]), true);
             }
         }
-        public int Mod(int a) => (a %= X) < 0 ? a + X : a;
+        public int Mod(int a) => (a %= M) < 0 ? a + M : a;
     }
 }
