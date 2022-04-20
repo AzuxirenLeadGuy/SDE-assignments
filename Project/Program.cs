@@ -23,7 +23,7 @@ namespace SDE_Project
             Random randomGen = new();
             StandardBloomFilter<int> normalfilter = new(bitsize, hashbloomfilter.DefaultBloomFilterHashes);
             int insertionsize = (int)(bitsize * 0.69f / ksize) * 2;
-            int[] allitems = Enumerable.Range(0, 65536).OrderBy(x => randomGen.Next()).Take(insertionsize).ToArray();
+            int[] allitems = Enumerable.Range(0, insertionsize+5).OrderBy(x => randomGen.Next()).Take(insertionsize).ToArray();
             double sum = insertionsize;
             insertionsize /= 2;
             int[] poskeys = allitems.Take(insertionsize).ToArray();
@@ -35,27 +35,27 @@ namespace SDE_Project
                 normalfilter.Insert(poskeys[i]);
                 hashbloomfilter.Add(poskeys[i]);
             }
-            int failed = 0;
             hashbloomfilter.OptimizeFalsePositiveKey(poskeys, negkeys);
-            Console.WriteLine($"Optimization failed for {failed}/{poskeys.Length} items!");
             for (i = 0; i < poskeys.Length; i++)
             {
-                if (normalfilter.Check(poskeys[i]))
+                int item = poskeys[i];
+                if (normalfilter.Check(item))
                     a.TruePositive++;
                 else
                     a.FalseNegative++;
-                if (hashbloomfilter.Check(poskeys[i]))
+                if (hashbloomfilter.Check(item))
                     b.TruePositive++;
                 else
                     b.FalseNegative++;
             }
             for (i = 0; i < negkeys.Length; i++)
             {
-                if (normalfilter.Check(negkeys[i]))
+                int item = negkeys[i];
+                if (normalfilter.Check(item))
                     a.FalsePositive++;
                 else
                     a.TrueNegative++;
-                if (hashbloomfilter.Check(negkeys[i]))
+                if (hashbloomfilter.Check(item))
                     b.FalsePositive++;
                 else
                     b.TrueNegative++;
