@@ -20,16 +20,15 @@ namespace SDE_Project
             GlobalHashes = totalhashes.Take(globalHashes).ToArray();
             var remaininghashes = totalhashes.TakeLast(defaultHashes);
             filter = new(bits, remaininghashes.ToArray());
-            expressor = new(1 + (2 * globalHashes), GlobalHashes, filter, defaultHashes);
+            expressor = new(1 + (4 * globalHashes), GlobalHashes, filter, defaultHashes);
         }
         public bool Check(ItemType item)
         {
             if (item == null) throw new ArgumentException("Item cannot be null", nameof(item));
-            bool check = filter.Check(item);
-            if (check==false) return false; // No need to check hash-expressor
             int[]? posits = expressor.Query(item);
-            if (posits == null) return true; // this point was never queried as a false positive key
-            else return filter.CheckPositions(posits);
+            bool check = filter.Check(item);
+            if (posits != null) check = filter.CheckPositions(posits);
+            return check;
         }
         public void Add(ItemType item)
         {

@@ -12,7 +12,7 @@ namespace SDE_Project
         {
             Random random = new();
             byte[] av = Enumerable.Range(start, 2 * count).OrderBy(x => random.Next()).Select(x => (byte)x).ToArray();
-            return Enumerable.Range(0, count).Select(x => new HashStruct(av[x], av[count + x])).ToArray();
+            return Enumerable.Range(0, count).Select(x => new HashStruct((byte)(av[x]+1), av[count + x])).ToArray();
         }
     }
 }

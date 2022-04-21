@@ -8,9 +8,8 @@ namespace SDE_Project
         {
             GenericTest(32, 2, 10);
             GenericTest(64, 3, 20);
-            GenericTest(1024, 5, 40);
-            GenericTest(8192, 6, 64);
-            GenericTest(65536, 6, 128);
+            GenericTest(1024, 5, 60);
+            GenericTest(8192, 6, 120);
         }
         public struct BloomFilterResult
         {

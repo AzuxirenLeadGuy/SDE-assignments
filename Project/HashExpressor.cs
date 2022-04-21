@@ -33,33 +33,44 @@ namespace SDE_Project
             int[] NCFK = Array.Empty<int>();
             Console.WriteLine($"Found {fp.Length} false positive keys!");
             int i, j, best = 0, leastclash = tp.Length, clash, succ = 0;
-            for (i = 0; i < HashLength; i++)
             {
-                List<(int, int)> poskeys = new(), negkeys = new();
-                var Hashfn = GlobalHashes[i];
-                for (j = tp.Length - 1; j >= 0; j--)
+                List<int> tpKeys = new(), fpKeys = new(), clashKeys = new();
+                for (i = tp.Length - 1; i >= 0; i--)
                 {
-                    var item = tp[j];
-                    if (item == null) throw new ArgumentException("Null object found", nameof(tp));
-                    poskeys.Add((Mod(Hashfn.Hash(item.GetHashCode())), item.GetHashCode()));
+                    var item = tp[i];
+                    if (item == null) throw new ArgumentException("Null object found");
+                    tpKeys.Add(item.GetHashCode());
                 }
-                for (j = fp.Length - 1; j >= 0; j--)
+                for (i = fp.Length - 1; i >= 0; i--)
                 {
-                    var item = fp[j];
-                    if (item == null) throw new ArgumentException("Null object found", nameof(fp));
-                    negkeys.Add((Mod(Hashfn.Hash(item.GetHashCode())), item.GetHashCode()));
+                    var item = fp[i];
+                    if (item == null) throw new ArgumentException("Null object found");
+                    fpKeys.Add(item.GetHashCode());
                 }
-                poskeys.RemoveAll(x => negkeys.Contains(x)==false);
-                negkeys.RemoveAll(x => poskeys.Contains(x));
-                clash = poskeys.Count;
-                if (leastclash > clash)
+                for (i = 0; i < HashLength; i++)
                 {
-                    leastclash = clash;
-                    best = i;
-                    NCFK = negkeys.Select(x => x.Item2).ToArray();
+                    List<int> poskeys = new(), negkeys = new();
+                    var Hashfn = GlobalHashes[i];
+                    foreach (int item in tpKeys)
+                    {
+                        poskeys.Add(Mod(Hashfn.Hash(item.GetHashCode())));
+                    }
+                    foreach (int item in fpKeys)
+                    {
+                        negkeys.Add(Mod(Hashfn.Hash(item.GetHashCode())));
+                    }
+                    poskeys.RemoveAll(x => negkeys.Contains(x) == false);
+                    negkeys.RemoveAll(x => poskeys.Contains(x));
+                    clash = poskeys.Count;
+                    if (leastclash > clash)
+                    {
+                        leastclash = clash;
+                        best = i;
+                        NCFK = fpKeys.Where(x => negkeys.Contains(Mod(Hashfn.Hash(x)))).ToArray();
+                    }
                 }
             }
-            Console.WriteLine($"Selecting a default hash causing {leastclash} collisions");
+            Console.WriteLine($"Selecting a default hash causing {leastclash} collisions, and can only optimize {NCFK.Length} points");
             DefaultHash = best;
             for (i = 0; i < Omega; i++)
             {
@@ -84,6 +95,8 @@ namespace SDE_Project
                     int idx = neghashes[i];
                     Cells[cell, i] = idx;
                 }
+                int[]? check = Query(key_e);
+                if (check == null || filter.CheckPositions(check) != false) throw new Exception("This should not happen!");
             }
             return succ;
         }
@@ -91,6 +104,10 @@ namespace SDE_Project
         {
             if (item == null) throw new ArgumentException("Cannot process null object");
             int key_e = item.GetHashCode();
+            return Query(key_e);
+        }
+        public int[]? Query(int key_e)
+        {
             int cell = Mod(GlobalHashes[DefaultHash].Hash(key_e));
             if (Cells[cell, 0] == -1) return null;
             int[] positions = new int[K];
