@@ -2,7 +2,7 @@
 using System.Linq;
 namespace SDE_Project
 {
-    public static class Program
+    static class Program
     {
         public static void Main()
         {
@@ -10,6 +10,7 @@ namespace SDE_Project
             GenericTest(64, 3, 20);
             GenericTest(1024, 5, 60);
             GenericTest(8192, 6, 120);
+            GenericTest(65536, 6, 255);
         }
         public struct BloomFilterResult
         {
@@ -18,11 +19,11 @@ namespace SDE_Project
         public static (BloomFilterResult standard, BloomFilterResult habf) GenericTest(int bitsize, byte ksize, byte extrahashsize)
         {
             Console.WriteLine("Showcasing the Bloom filter and the Hash adaptive bloom filter");
-            HABF<int> hashbloomfilter = new(bitsize, ksize, extrahashsize);
+            HABF<int> hashbloomfilter = new(bitsize, ksize, extrahashsize, extrahashsize << 3);
             Random randomGen = new();
             StandardBloomFilter<int> normalfilter = new(bitsize, hashbloomfilter.DefaultBloomFilterHashes);
             int insertionsize = (int)(bitsize * 0.69f / ksize) * 2;
-            int[] allitems = Enumerable.Range(0, insertionsize+5).OrderBy(x => randomGen.Next()).Take(insertionsize).ToArray();
+            int[] allitems = Enumerable.Range(0, insertionsize + 5).OrderBy(x => randomGen.Next()).Take(insertionsize).ToArray();
             double sum = insertionsize;
             insertionsize /= 2;
             int[] poskeys = allitems.Take(insertionsize).ToArray();
@@ -32,9 +33,8 @@ namespace SDE_Project
             for (i = 0; i < poskeys.Length; i++)
             {
                 normalfilter.Insert(poskeys[i]);
-                hashbloomfilter.Add(poskeys[i]);
             }
-            hashbloomfilter.OptimizeFalsePositiveKey(poskeys, negkeys);
+            hashbloomfilter.OptimizeAndInsert(poskeys, negkeys);
             for (i = 0; i < poskeys.Length; i++)
             {
                 int item = poskeys[i];
@@ -59,7 +59,7 @@ namespace SDE_Project
                 else
                     b.TrueNegative++;
             }
-            Console.WriteLine(@"================= Standard Bloom Filter | Hash Adaptive Bloom Filter ");
+            Console.WriteLine(@"================= Standard Bloom Filter  | Hash Adaptive Bloom Filter ");
             printhelper("True Positive  = ", a.TruePositive, b.TruePositive);
             printhelper("False Negative = ", a.FalseNegative, b.FalseNegative);
             printhelper("True Negative  = ", a.TrueNegative, b.TrueNegative);
@@ -67,7 +67,7 @@ namespace SDE_Project
             Console.WriteLine("\n\n");
             void printhelper(string title, uint a, uint b)
             {
-                Console.WriteLine($"{$"{title} {a}, {a * 100 / sum:00.000} ",40}|{b}, {b * 100 / sum:00.000} %");
+                Console.WriteLine($"{$"{title} {a * 100 / sum:00.000} ",40} | {b * 100 / sum:00.000} %");
             }
             return (a, b);
         }
